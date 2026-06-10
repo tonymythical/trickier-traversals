@@ -11,7 +11,10 @@ public class Traversals {
    * @return the sum of leaf node values, or 0 if the tree is null
    */
   public static int sumLeafNodes(TreeNode<Integer> node) {
-    return 0;
+    if (node == null) return 0;
+    if (node.left == null && node.right == null) return node.value;
+
+    return sumLeafNodes(node.left) + sumLeafNodes(node.right);
   }
 
   /**
@@ -23,7 +26,10 @@ public class Traversals {
    * @return the count of internal nodes, or 0 if the tree is null
    */
   public static int countInternalNodes(TreeNode<Integer> node) {
-    return 0;
+    if (node == null) return 0;
+    if (node.left == null && node.right == null) return 0;
+
+    return 1 + countInternalNodes(node.left) + countInternalNodes(node.right);
   }
 
   /**
@@ -37,7 +43,14 @@ public class Traversals {
    * @return a post-order traversal string, or an empty string if the tree is null
    */
   public static <T> String buildPostOrderString(TreeNode<T> node) {
-    return null;
+    if (node == null) return "";
+    StringBuilder stringy = new StringBuilder();
+
+    stringy.append(buildPostOrderString(node.left)); //go left
+    stringy.append(buildPostOrderString(node.right)); //go right
+    stringy.append(node.value); //then visit root
+
+    return stringy.toString();
   }
 
   /**
@@ -49,7 +62,26 @@ public class Traversals {
    * @return a list of node values in a top-to-bottom order, or an empty list if the tree is null
    */
   public static <T> List<T> collectLevelOrderValues(TreeNode<T> node) {
-    return null;
+    List<T> result = new ArrayList<>();
+    if (node == null) {
+      return result;
+    }
+    
+    Queue<TreeNode<T>> queue = new LinkedList<>();
+    queue.add(node);
+    
+    while (!queue.isEmpty()) {
+      TreeNode<T> current = queue.poll();
+      result.add(current.value);
+      
+      if (current.left != null) {
+        queue.add(current.left);
+      }
+      if (current.right != null) {
+        queue.add(current.right);
+      }
+    }
+    return result;
   }
 
   /**
@@ -60,7 +92,25 @@ public class Traversals {
    * @return the number of unique values in the tree, or 0 if the tree is null
    */
   public static int countDistinctValues(TreeNode<Integer> node) {
-    return 0;
+    if (node == null) return 0;
+
+    Set<Integer> distinctValues = new HashSet<>();
+    Queue<TreeNode<Integer>> queue = new LinkedList<>();
+    queue.add(node);
+
+    while (!queue.isEmpty()) {
+      TreeNode<Integer> current = queue.poll();
+      distinctValues.add(current.value); 
+
+      if (current.left != null) {
+        queue.add(current.left);
+      }
+      if (current.right != null) {
+        queue.add(current.right);
+      }
+    }
+
+    return distinctValues.size();
   }
 
   /**
@@ -72,6 +122,31 @@ public class Traversals {
    * @return true if there exists a strictly increasing root-to-leaf path, false otherwise
    */
   public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) {
+    if (node == null) return false;
+
+    Queue<TreeNode<Integer>> nodeQueue = new LinkedList<>();
+    Queue<Integer> valueQueue = new LinkedList<>();
+
+    nodeQueue.add(node);
+    valueQueue.add(Integer.MIN_VALUE);
+
+    while (!nodeQueue.isEmpty()) {
+      TreeNode<Integer> current = nodeQueue.poll();
+      int previousValue = valueQueue.poll();
+      if (current.value > previousValue) {
+        if (current.left == null && current.right == null) {
+          return true;
+        }
+        if (current.left != null) {
+          nodeQueue.add(current.left);
+          valueQueue.add(current.value);
+        }
+        if (current.right != null) {
+          nodeQueue.add(current.right);
+          valueQueue.add(current.value);
+        }
+      }
+    }
     return false;
   }
 
@@ -87,7 +162,13 @@ public class Traversals {
    * @return true if the trees have the same shape, false otherwise
    */
   public static <T> boolean haveSameShape(TreeNode<T> nodeA, TreeNode<T> nodeB) {
-    return false;
+    if (nodeA == null && nodeB == null) {
+      return true;
+    }
+    if (nodeA == null || nodeB == null) {
+      return false;
+    }
+    return haveSameShape(nodeA.left, nodeB.left) && haveSameShape(nodeA.right, nodeB.right);
   }
 
 
@@ -119,6 +200,26 @@ public class Traversals {
    * @return a list of lists, where each inner list represents a root-to-leaf path in pre-order
    */
   public static <T> List<List<T>> findAllRootToLeafPaths(TreeNode<T> node) {
-    return null;
+    List<List<T>> allPaths = new ArrayList<>();
+    if (node == null) {
+      return allPaths;
+    }
+    findPathsHelper(node, new ArrayList<>(), allPaths);
+    return allPaths;
+  }
+
+  //helper method for recursion
+  private static <T> void findPathsHelper(TreeNode<T> node, List<T> currentPath, List<List<T>> allPaths) {
+    if (node == null) {
+      return;
+    }
+    currentPath.add(node.value);
+    if (node.left == null && node.right == null) {
+      allPaths.add(List.copyOf(currentPath));
+    } else {
+      findPathsHelper(node.left, currentPath, allPaths);
+      findPathsHelper(node.right, currentPath, allPaths);
+    }
+    currentPath.remove(currentPath.size() - 1);
   }
 }
